@@ -376,7 +376,7 @@ class Graph:
         """
 
         if begin_id in self.vertices and end_id in self.vertices:
-            path = dict()  # dict[key] = (pred, 
+            path = dict()  # dict[key] = (pred,
             queue = PriorityQueue()
             queue.push(0, self.vertices[begin_id])
             for vert in self.vertices:
