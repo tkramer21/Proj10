@@ -443,7 +443,51 @@ class Graph:
 
 
 def tollway_algorithm_again(graph: Graph, begin, end, metric: Callable[[Vertex, Vertex], float], coupon):
-    pass
+    """
+
+    :param graph:
+    :param begin:
+    :param end:
+    :param metric:
+    :param coupon:
+    :return:
+    """
+
+    if begin in graph.vertices and end in graph.vertices:
+        path = dict()  # dict[key] = (pred, weight)
+        queue = PriorityQueue()
+        queue.push(0, graph.vertices[begin])
+        discount = float("inf")
+        for vert in graph.vertices:
+            path[vert] = (None, float("inf"))
+
+        path[begin] = (None, 0)
+
+        while not queue.empty():
+            wgt, curr = queue.pop()
+            if curr.id != end:
+                for adj in graph.vertices[curr.id].adj:
+                    if coupon[0](adj) and coupon[1] < 1 and graph.vertices[curr.id].adj[adj] * coupon[1] < discount:
+                        new_cost = path[curr.id][-1] + graph.vertices[curr.id].adj[adj] * coupon[1]
+                        discount = graph.vertices[curr.id].adj[adj] * coupon[1]
+
+                    else:
+                        new_cost = path[curr.id][-1] + graph.vertices[curr.id].adj[adj]
+
+                    if path[adj][-1] > new_cost:
+                        metric_cost = metric(graph.vertices[adj], graph.vertices[end])
+                        if adj not in queue.locator:
+                            queue.push(new_cost + metric_cost, graph.vertices[adj])
+                            path[adj] = (curr.id, new_cost)
+
+                        else:
+                            queue.update(new_cost + metric_cost, graph.vertices[adj])
+                            path[adj] = (curr.id, new_cost)
+
+            else:
+                return graph.build_path(path, begin, end)
+
+    return ([], 0)
 
 
 class PriorityQueue:
