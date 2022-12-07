@@ -444,20 +444,24 @@ class Graph:
 
 def tollway_algorithm_again(graph: Graph, begin, end, metric: Callable[[Vertex, Vertex], float], coupon):
     """
+    Searches for the minimum path from params begin to end using A* search while applying a coupon once if applicable
 
-    :param graph:
-    :param begin:
-    :param end:
-    :param metric:
-    :param coupon:
-    :return:
+    :param graph: graph to be searched
+    :param begin: a str representing the starting vertex of the graph
+    :param end: a str representing the ending vertex of the graph
+    :param metric: a callable that returns the taxicab or euclidean distance from one vertex to another
+    :param coupon: a tuple containing: a lambda function to check if the coupon can be applied to the current vertex,
+                    and an int multiplier representing the modifier of the mystery coupon
+    :return: a tuple containing: a list representing the shortest path from begin to end, and a number representing
+            the weight of that path
     """
 
     if begin in graph.vertices and end in graph.vertices:
         path = dict()  # dict[key] = (pred, weight)
+        discount = (None, None, float("inf"))
         queue = PriorityQueue()
         queue.push(0, graph.vertices[begin])
-        discount = float("inf")
+
         for vert in graph.vertices:
             path[vert] = (None, float("inf"))
 
@@ -467,12 +471,7 @@ def tollway_algorithm_again(graph: Graph, begin, end, metric: Callable[[Vertex, 
             wgt, curr = queue.pop()
             if curr.id != end:
                 for adj in graph.vertices[curr.id].adj:
-                    if coupon[0](adj) and coupon[1] < 1 and graph.vertices[curr.id].adj[adj] * coupon[1] < discount:
-                        new_cost = path[curr.id][-1] + graph.vertices[curr.id].adj[adj] * coupon[1]
-                        discount = graph.vertices[curr.id].adj[adj] * coupon[1]
-
-                    else:
-                        new_cost = path[curr.id][-1] + graph.vertices[curr.id].adj[adj]
+                    new_cost = path[curr.id][-1] + graph.vertices[curr.id].adj[adj]
 
                     if path[adj][-1] > new_cost:
                         metric_cost = metric(graph.vertices[adj], graph.vertices[end])
@@ -485,6 +484,8 @@ def tollway_algorithm_again(graph: Graph, begin, end, metric: Callable[[Vertex, 
                             path[adj] = (curr.id, new_cost)
 
             else:
+                if discount[0] is not None:
+                    graph.vertices[discount[0]].adj[1] = discount[-1]
                 return graph.build_path(path, begin, end)
 
     return ([], 0)

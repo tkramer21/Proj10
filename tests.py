@@ -577,6 +577,8 @@ class GraphTests(unittest.TestCase):
         graph.add_to_graph('STEM', 'Engineer Building', 3)
         free_pass_stem = (lambda v_id: v_id == "STEM", 0)
         expected = (['Wilson Hall', 'Wonder Hall', 'STEM', 'Engineer Building'], 10)
+        graph.plot_show = True
+        graph.plot()
         actual = tollway_algorithm_again(graph, 'Wilson Hall', 'Engineer Building',
                                          Vertex.taxicab_distance, free_pass_stem)
         self.assertEqual(expected, actual)  # (4.1) Useful coupon that making lower cost
