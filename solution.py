@@ -371,7 +371,7 @@ class Graph:
 
         :param begin_id: a string representing the starting vertex of the search
         :param end_id: a string representing the ending vertex of the search
-        :return: a tuple containing a list of strings (begin vertex --> end vertex) and an int representing
+        :return: a tuple containing a list of strings (begin vertex --> end vertex) and a float representing
                 the weight of the path
         """
 
@@ -403,7 +403,43 @@ class Graph:
 
     def a_star(self, begin_id: str, end_id: str,
                metric: Callable[[Vertex, Vertex], float]) -> Tuple[List[str], float]:
-        pass
+        """
+        Searches a graph using A* algorithm
+
+        :param begin_id: a string representing the starting vertex
+        :param end_id: a string representing the ending vertex
+        :param metric: a callable that will either compute the taxicab or euclidean distance
+        :return: A tuple containing a list of strings (the path begin_id to end_id) and a float (weight of path)
+        """
+
+        if begin_id in self.vertices and end_id in self.vertices:
+            path = dict()  # dict[key] = (pred,
+            queue = PriorityQueue()
+            queue.push(0, self.vertices[begin_id])
+            for vert in self.vertices:
+                path[vert] = (None, float("inf"))
+
+            path[begin_id] = (None, 0)
+
+            while not queue.empty():
+                wgt, curr = queue.pop()
+                if curr.id != end_id:
+                    for adj in self.vertices[curr.id].adj:
+                        new_cost = path[curr.id][-1] + self.vertices[curr.id].adj[adj]
+                        if path[adj][-1] > new_cost:
+                            metric_cost = metric(self.vertices[adj], self.vertices[end_id])
+                            if adj not in queue.locator:
+                                queue.push(new_cost + metric_cost, self.vertices[adj])
+                                path[adj] = (curr.id, new_cost)
+
+                            else:
+                                queue.update(new_cost + metric_cost, self.vertices[adj])
+                                path[adj] = (curr.id, new_cost)
+
+                else:
+                    return self.build_path(path, begin_id, end_id)
+
+        return ([], 0)
 
 
 def tollway_algorithm_again(graph: Graph, begin, end, metric: Callable[[Vertex, Vertex], float], coupon):
